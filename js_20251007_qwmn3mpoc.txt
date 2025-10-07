@@ -1,0 +1,46 @@
+// server.js
+const express = require('express');
+const cors = require('cors');
+const axios = require('axios');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// Замени на свои API-ключи
+const API_KEYS = {
+  openai: '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',
+  grok: 'xai-твой-grok-ключ',
+  gemini: 'gemini-твой-ключ'
+};
+
+const PROVIDERS = {
+  openai: 'https://api.openai.com/v1/chat/completions',
+  grok: 'https://api.x.ai/v1/chat/completions',
+  gemini: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent'
+};
+
+app.post('/api/chat', async (req, res) => {
+  const { message, provider } = req.body;
+
+  try {
+    const response = await axios.post(PROVIDERS[provider], {
+      model: 'gpt-3.5-turbo',
+      messages: [{ role: 'user', content: message }],
+      max_tokens: 200
+    }, {
+      headers: {
+        'Authorization': `Bearer ${API_KEYS[provider]}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.listen(5000, () => {
+  console.log('Сервер запущен на http://localhost:5000');
+});
